@@ -85,13 +85,13 @@
       const text = msgInput.value.trim();
       
       if (username && text !== "") {
-        const newMessageRef = messagesRef.push();
-        newMessageRef.set({
+        // Push a new message to Firebase
+        messagesRef.push({
           username: username,
           text: text
         });
 
-        msgInput.value = ""; // Clear the message input
+        msgInput.value = ""; // Clear the message input field
       }
     }
 
@@ -105,7 +105,9 @@
 
     // Handle pressing Enter to send a message
     msgInput.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") sendMessage();
+      if (e.key === "Enter") {
+        sendMessage();
+      }
     });
   </script>
 </body>
