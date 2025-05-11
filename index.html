@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>GameChatz</title>
+  <script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-database.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -43,37 +45,64 @@
   <h1>GameChatz</h1>
   <div id="messages"></div>
   <div id="inputBox">
+    <input type="text" id="username" placeholder="Enter your username...">
     <input type="text" id="msgInput" placeholder="Type a message...">
     <button onclick="sendMessage()">Send</button>
   </div>
 
   <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBuLyGwCrPY26ohmHY4YwLVwF0dlAfkzak",
+      authDomain: "gamechatz-e61e7.firebaseapp.com",
+      databaseURL: "https://gamechatz-e61e7-default-rtdb.firebaseio.com",
+      projectId: "gamechatz-e61e7",
+      storageBucket: "gamechatz-e61e7.firebasestorage.app",
+      messagingSenderId: "155399717230",
+      appId: "1:155399717230:web:ae414fa8739baf63d0c17f",
+      measurementId: "G-5XW4J2BQ7N"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database(app);
+    const messagesRef = database.ref('messages');
+
     const messagesDiv = document.getElementById("messages");
     const msgInput = document.getElementById("msgInput");
+    const usernameInput = document.getElementById("username");
 
-    // Load messages from localStorage
-    const savedMessages = JSON.parse(localStorage.getItem("gamechatz_messages")) || [];
-    savedMessages.forEach(text => {
-      addMessage(text);
+    // Listen for new messages
+    messagesRef.on('child_added', (snapshot) => {
+      const message = snapshot.val();
+      addMessage(message.username, message.text);
     });
 
+    // Send a new message to Firebase
     function sendMessage() {
+      const username = usernameInput.value.trim();
       const text = msgInput.value.trim();
-      if (text !== "") {
-        addMessage(text);
-        savedMessages.push(text);
-        localStorage.setItem("gamechatz_messages", JSON.stringify(savedMessages));
+      
+      if (username && text !== "") {
+        const newMessageRef = messagesRef.push();
+        newMessageRef.set({
+          username: username,
+          text: text
+        });
+
         msgInput.value = "";
       }
     }
 
-    function addMessage(text) {
+    // Add message to the UI
+    function addMessage(username, text) {
       const msg = document.createElement("div");
-      msg.textContent = text;
+      msg.textContent = `${username}: ${text}`;
       messagesDiv.appendChild(msg);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
+    // Handle pressing Enter to send a message
     msgInput.addEventListener("keydown", function(e) {
       if (e.key === "Enter") sendMessage();
     });
