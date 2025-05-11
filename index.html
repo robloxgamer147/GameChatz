@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>GameChatz</title>
-  <script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.5.0/firebase-database.js"></script>
+  <!-- Include Firebase SDK v9 -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -65,8 +66,8 @@
 
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database(app);
-    const messagesRef = database.ref('messages');
+    const db = firebase.database(app);
+    const messagesRef = db.ref('messages');
 
     const messagesDiv = document.getElementById("messages");
     const msgInput = document.getElementById("msgInput");
@@ -90,7 +91,7 @@
           text: text
         });
 
-        msgInput.value = "";
+        msgInput.value = ""; // Clear the message input
       }
     }
 
