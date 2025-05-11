@@ -3,56 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>GameChatz</title>
-  <!-- Include Firebase SDK v9 -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #1e1e2f;
-      color: #fff;
-    }
-    h1 {
-      text-align: center;
-      color: #66ff99;
-    }
-    #messages {
-      border: 1px solid #444;
-      padding: 10px;
-      height: 300px;
-      overflow-y: auto;
-      background: #2e2e3e;
-    }
-    #inputBox {
-      display: flex;
-      margin-top: 10px;
-    }
-    input {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      outline: none;
-    }
-    button {
-      padding: 10px;
-      background-color: #66ff99;
-      border: none;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <h1>GameChatz</h1>
-  <div id="messages"></div>
-  <div id="inputBox">
-    <input type="text" id="username" placeholder="Enter your username...">
-    <input type="text" id="msgInput" placeholder="Type a message...">
-    <button onclick="sendMessage()">Send</button>
-  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-  <script>
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBuLyGwCrPY26ohmHY4YwLVwF0dlAfkzak",
       authDomain: "gamechatz-e61e7.firebaseapp.com",
@@ -64,51 +18,59 @@
       measurementId: "G-5XW4J2BQ7N"
     };
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.database(app);
-    const messagesRef = db.ref('messages');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const messagesRef = ref(db, 'messages');
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      const messagesDiv = document.getElementById("messages");
+      const msgInput = document.getElementById("msgInput");
+      const usernameInput = document.getElementById("username");
+      const sendBtn = document.getElementById("sendBtn");
 
-    const messagesDiv = document.getElementById("messages");
-    const msgInput = document.getElementById("msgInput");
-    const usernameInput = document.getElementById("username");
+      sendBtn.addEventListener("click", sendMessage);
+      msgInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      });
 
-    // Listen for new messages
-    messagesRef.on('child_added', (snapshot) => {
-      const message = snapshot.val();
-      addMessage(message.username, message.text);
-    });
-
-    // Send a new message to Firebase
-    function sendMessage() {
-      const username = usernameInput.value.trim();
-      const text = msgInput.value.trim();
-      
-      if (username && text !== "") {
-        // Push a new message to Firebase
-        messagesRef.push({
-          username: username,
-          text: text
-        });
-
-        msgInput.value = ""; // Clear the message input field
+      function sendMessage() {
+        const username = usernameInput.value.trim();
+        const text = msgInput.value.trim();
+        if (username && text) {
+          push(messagesRef, {
+            username: username,
+            text: text
+          });
+          msgInput.value = "";
+        } else {
+          alert("Please enter both a username and a message.");
+        }
       }
-    }
 
-    // Add message to the UI
-    function addMessage(username, text) {
-      const msg = document.createElement("div");
-      msg.textContent = `${username}: ${text}`;
-      messagesDiv.appendChild(msg);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-
-    // Handle pressing Enter to send a message
-    msgInput.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        sendMessage();
+      function addMessage(username, text) {
+        const msg = document.createElement("div");
+        msg.textContent = `${username}: ${text}`;
+        messagesDiv.appendChild(msg);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
       }
+
+      const messagesRefAdded = ref(db, 'messages');
+      onChildAdded(messagesRefAdded, (snapshot) => {
+        const message = snapshot.val();
+        addMessage(message.username, message.text);
+      });
     });
   </script>
+</head>
+<body>
+  <h1>GameChatz</h1>
+  <div id="messages"></div>
+  <div id="inputBox">
+    <input type="text" id="username" placeholder="Enter your username...">
+    <input type="text" id="msgInput" placeholder="Type a message...">
+    <button id="sendBtn">Send</button>
+  </div>
 </body>
 </html>
