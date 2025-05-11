@@ -20,7 +20,7 @@
       min-height: 100vh;
     }
 
-    #app {
+    #login, #chat {
       width: 100%;
       max-width: 600px;
       background-color: #ffffff;
@@ -37,14 +37,6 @@
       text-align: center;
       padding: 16px;
       font-size: 24px;
-    }
-
-    #messages {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-      background-color: #f9f9f9;
-      border-bottom: 1px solid #ddd;
     }
 
     #inputBox {
@@ -80,6 +72,14 @@
       background-color: #3700b3;
     }
 
+    #messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+      border-bottom: 1px solid #ddd;
+    }
+
     #messages div {
       padding: 8px;
       margin-bottom: 8px;
@@ -90,7 +90,7 @@
 
     /* Mobile Responsiveness */
     @media (max-width: 600px) {
-      #app {
+      #login, #chat {
         margin: 10px;
       }
 
@@ -108,6 +108,25 @@
       }
     }
   </style>
+</head>
+<body>
+  <div id="login">
+    <h1>Login to GameChatz</h1>
+    <div id="inputBox">
+      <input type="text" id="username" placeholder="Enter your username..." />
+      <button id="loginBtn">Login</button>
+    </div>
+  </div>
+
+  <div id="chat" style="display: none;">
+    <h1>GameChatz</h1>
+    <div id="messages"></div>
+    <div id="inputBox">
+      <input type="text" id="msgInput" placeholder="Type a message..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
@@ -128,10 +147,24 @@
     const messagesRef = ref(db, 'messages');
 
     document.addEventListener("DOMContentLoaded", () => {
+      const loginDiv = document.getElementById("login");
+      const chatDiv = document.getElementById("chat");
+      const usernameInput = document.getElementById("username");
+      const loginBtn = document.getElementById("loginBtn");
       const messagesDiv = document.getElementById("messages");
       const msgInput = document.getElementById("msgInput");
-      const usernameInput = document.getElementById("username");
       const sendBtn = document.getElementById("sendBtn");
+
+      loginBtn.addEventListener("click", () => {
+        const username = usernameInput.value.trim();
+        if (username) {
+          loginDiv.style.display = "none";
+          chatDiv.style.display = "block";
+          loadMessages();
+        } else {
+          alert("Please enter a username!");
+        }
+      });
 
       sendBtn.addEventListener("click", sendMessage);
       msgInput.addEventListener("keydown", (e) => {
@@ -161,26 +194,17 @@
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       }
 
-      onValue(messagesRef, (snapshot) => {
-        const messages = snapshot.val();
-        messagesDiv.innerHTML = ''; // Clear the existing messages
-        for (let id in messages) {
-          const message = messages[id];
-          addMessage(message.username, message.text);
-        }
-      });
+      function loadMessages() {
+        onValue(messagesRef, (snapshot) => {
+          const messages = snapshot.val();
+          messagesDiv.innerHTML = ''; // Clear the existing messages
+          for (let id in messages) {
+            const message = messages[id];
+            addMessage(message.username, message.text);
+          }
+        });
+      }
     });
   </script>
-</head>
-<body>
-  <div id="app">
-    <h1>GameChatz</h1>
-    <div id="messages"></div>
-    <div id="inputBox">
-      <input type="text" id="username" placeholder="Enter your username..." />
-      <input type="text" id="msgInput" placeholder="Type a message..." />
-      <button id="sendBtn">Send</button>
-    </div>
-  </div>
 </body>
 </html>
