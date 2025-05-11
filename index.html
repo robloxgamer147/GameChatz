@@ -89,12 +89,12 @@
     <button class="btn" onclick="logout()">Logout</button>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-
-  <script>
+  <script type="module">
     // Firebase Configuration
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getDatabase, ref, set, get, child, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyBuLyGwCrPY26ohmHY4YwLVwF0dlAfkzak",
       authDomain: "gamechatz-e61e7.firebaseapp.com",
@@ -107,9 +107,9 @@
     };
 
     // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getDatabase(app);
 
     // Show Login Page
     function showLogin() {
@@ -138,8 +138,8 @@
       const username = document.getElementById('login-username').value;
       const password = document.getElementById('login-password').value;
 
-      const userRef = db.ref('users/' + username);
-      userRef.once('value', (snapshot) => {
+      const userRef = ref(db, 'users/' + username);
+      get(userRef).then((snapshot) => {
         const userData = snapshot.val();
         if (userData && userData.password === password) {
           showChat();
@@ -160,12 +160,12 @@
         return;
       }
 
-      const userRef = db.ref('users/' + username);
-      userRef.once('value', (snapshot) => {
+      const userRef = ref(db, 'users/' + username);
+      get(userRef).then((snapshot) => {
         if (snapshot.exists()) {
           alert('Username already taken!');
         } else {
-          userRef.set({
+          set(userRef, {
             username: username,
             password: password
           });
@@ -180,21 +180,18 @@
       const message = document.getElementById('message-input').value;
       if (message.trim() === '') return;
 
-      const user = auth.currentUser;
-      if (user) {
-        const messagesRef = db.ref('messages/');
-        messagesRef.push({
-          username: user.displayName,
-          message: message
-        });
-        document.getElementById('message-input').value = ''; // Clear input
-      }
+      const messagesRef = ref(db, 'messages/');
+      push(messagesRef, {
+        username: document.getElementById('login-username').value,
+        message: message
+      });
+      document.getElementById('message-input').value = ''; // Clear input
     }
 
     // Load messages from Firebase Realtime Database
     function loadMessages() {
-      const messagesRef = db.ref('messages/');
-      messagesRef.on('child_added', (snapshot) => {
+      const messagesRef = ref(db, 'messages/');
+      onChildAdded(messagesRef, (snapshot) => {
         const messageData = snapshot.val();
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
@@ -205,7 +202,7 @@
 
     // Logout
     function logout() {
-      auth.signOut().then(() => {
+      signOut(auth).then(() => {
         showLogin();
       });
     }
