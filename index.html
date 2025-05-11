@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GameChatz</title>
+  <title>GameChatz - Login & Sign Up</title>
   <style>
     * {
       margin: 0;
@@ -12,8 +12,8 @@
     }
 
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      font-family: 'Arial', sans-serif;
+      background-color: #f7f7f7;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -21,12 +21,12 @@
       flex-direction: column;
     }
 
-    #login, #chat {
+    #login, #signup, #chat {
       width: 100%;
       max-width: 600px;
       background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -36,37 +36,46 @@
       background-color: #6200ea;
       color: white;
       text-align: center;
-      padding: 16px;
+      padding: 20px;
       font-size: 24px;
+      letter-spacing: 1px;
+    }
+
+    #login h1, #signup h1 {
+      background-color: #03a9f4;
     }
 
     #inputBox {
       display: flex;
       flex-direction: column;
-      padding: 16px;
+      padding: 20px;
       background-color: white;
-      border-top: 1px solid #ddd;
     }
 
     #inputBox input {
-      padding: 10px;
-      margin-bottom: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
       border: 1px solid #ddd;
-      border-radius: 4px;
+      border-radius: 8px;
       font-size: 16px;
       width: 100%;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      transition: border-color 0.3s ease;
+    }
+
+    #inputBox input:focus {
+      border-color: #6200ea;
     }
 
     #inputBox button {
-      padding: 10px;
+      padding: 12px;
       background-color: #6200ea;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
       transition: background-color 0.3s ease;
-      width: 100%;
     }
 
     #inputBox button:hover {
@@ -75,33 +84,38 @@
 
     #messages {
       flex: 1;
-      padding: 16px;
+      padding: 20px;
       overflow-y: auto;
-      background-color: #f9f9f9;
+      background-color: #fafafa;
       border-bottom: 1px solid #ddd;
     }
 
     #messages div {
-      padding: 8px;
-      margin-bottom: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
       background-color: #eeeeee;
-      border-radius: 4px;
+      border-radius: 8px;
+      font-size: 16px;
       word-wrap: break-word;
     }
 
     .tabs {
       display: flex;
-      justify-content: space-around;
+      justify-content: space-evenly;
       background-color: #6200ea;
-      padding: 8px;
+      padding: 10px;
+      border-top: 1px solid #ddd;
     }
 
     .tab {
       color: white;
       cursor: pointer;
-      padding: 10px;
-      border-radius: 4px;
+      padding: 12px;
+      border-radius: 8px;
       transition: background-color 0.3s ease;
+      font-weight: bold;
+      width: 50%;
+      text-align: center;
     }
 
     .tab:hover {
@@ -114,12 +128,12 @@
 
     /* Mobile Responsiveness */
     @media (max-width: 600px) {
-      #login, #chat {
+      #login, #signup, #chat {
         margin: 10px;
       }
 
       h1 {
-        font-size: 18px;
+        font-size: 20px;
       }
 
       #inputBox input,
@@ -130,18 +144,38 @@
       #messages div {
         font-size: 14px;
       }
+
+      .tab {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Login Page -->
   <div id="login">
     <h1>Login to GameChatz</h1>
     <div id="inputBox">
-      <input type="text" id="username" placeholder="Enter your username..." />
+      <input type="text" id="loginUsername" placeholder="Enter your username" />
+      <input type="password" id="loginPassword" placeholder="Enter your password" />
       <button id="loginBtn">Login</button>
+      <p>Don't have an account? <span id="signupLink" style="color: blue; cursor: pointer;">Sign up</span></p>
     </div>
   </div>
 
+  <!-- Sign Up Page -->
+  <div id="signup" style="display: none;">
+    <h1>Sign Up to GameChatz</h1>
+    <div id="inputBox">
+      <input type="text" id="signupUsername" placeholder="Enter your username" />
+      <input type="password" id="signupPassword" placeholder="Enter your password" />
+      <input type="password" id="repeatPassword" placeholder="Repeat your password" />
+      <button id="signupBtn">Sign Up</button>
+      <p>Already have an account? <span id="loginLink" style="color: blue; cursor: pointer;">Login</span></p>
+    </div>
+  </div>
+
+  <!-- Chat Page -->
   <div id="chat" style="display: none;">
     <h1>GameChatz</h1>
     <!-- Tabs to switch between chats -->
@@ -166,6 +200,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
     import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
     const firebaseConfig = {
@@ -180,95 +215,147 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getDatabase(app);
     const messagesRef1 = ref(db, 'chat1/messages');
     const messagesRef2 = ref(db, 'chat2/messages');
 
     document.addEventListener("DOMContentLoaded", () => {
       const loginDiv = document.getElementById("login");
+      const signupDiv = document.getElementById("signup");
       const chatDiv = document.getElementById("chat");
-      const usernameInput = document.getElementById("username");
+
+      const loginUsername = document.getElementById("loginUsername");
+      const loginPassword = document.getElementById("loginPassword");
       const loginBtn = document.getElementById("loginBtn");
+      const signupLink = document.getElementById("signupLink");
+      const signupUsername = document.getElementById("signupUsername");
+      const signupPassword = document.getElementById("signupPassword");
+      const repeatPassword = document.getElementById("repeatPassword");
+      const signupBtn = document.getElementById("signupBtn");
+      const loginLink = document.getElementById("loginLink");
+
+      const usernameInput = document.getElementById("usernameInput");
+      const sendBtn = document.getElementById("sendBtn");
+
+      signupLink.addEventListener("click", () => {
+        loginDiv.style.display = "none";
+        signupDiv.style.display = "block";
+      });
+
+      loginLink.addEventListener("click", () => {
+        signupDiv.style.display = "none";
+        loginDiv.style.display = "block";
+      });
+
+      // Sign up
+      signupBtn.addEventListener("click", () => {
+        const username = signupUsername.value;
+        const password = signupPassword.value;
+        const confirmPassword = repeatPassword.value;
+
+        if (password === confirmPassword) {
+          createUserWithEmailAndPassword(auth, username, password)
+            .then((userCredential) => {
+              const user = userCredential.user;
+              console.log("Signed up:", user);
+              localStorage.setItem("username", username);
+              switchToChatPage();
+            })
+            .catch((error) => {
+              alert("Error: " + error.message);
+            });
+        } else {
+          alert("Passwords do not match!");
+        }
+      });
+
+      // Log in
+      loginBtn.addEventListener("click", () => {
+        const username = loginUsername.value;
+        const password = loginPassword.value;
+
+        signInWithEmailAndPassword(auth, username, password)
+          .then((userCredential) => {
+            const user = userCredential.user;
+            console.log("Logged in:", user);
+            localStorage.setItem("username", username);
+            switchToChatPage();
+          })
+          .catch((error) => {
+            alert("Error: " + error.message);
+          });
+      });
+
+      function switchToChatPage() {
+        loginDiv.style.display = "none";
+        signupDiv.style.display = "none";
+        chatDiv.style.display = "block";
+      }
+
+      // Chat functionality
       const messagesDiv1 = document.getElementById("messages1");
       const messagesDiv2 = document.getElementById("messages2");
       const msgInput = document.getElementById("msgInput");
-      const sendBtn = document.getElementById("sendBtn");
       const tab1 = document.getElementById("tab1");
       const tab2 = document.getElementById("tab2");
-      const chat1 = document.getElementById("chat1");
-      const chat2 = document.getElementById("chat2");
 
-      loginBtn.addEventListener("click", () => {
-        const username = usernameInput.value.trim();
-        if (username) {
-          loginDiv.style.display = "none";
-          chatDiv.style.display = "block";
-          loadMessages(1); // Load messages for Chat 1 by default
-        } else {
-          alert("Please enter a username!");
-        }
+      tab1.addEventListener("click", () => {
+        switchChat(1);
       });
 
-      sendBtn.addEventListener("click", sendMessage);
-      msgInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          sendMessage();
-        }
+      tab2.addEventListener("click", () => {
+        switchChat(2);
       });
 
-      tab1.addEventListener("click", () => switchChat(1));
-      tab2.addEventListener("click", () => switchChat(2));
+      sendBtn.addEventListener("click", () => {
+        sendMessage();
+      });
 
       function sendMessage() {
-        const username = usernameInput.value.trim();
-        const text = msgInput.value.trim();
-        const activeChat = tab1.classList.contains("active-tab") ? 1 : 2;
-
-        if (username && text) {
-          const messagesRef = activeChat === 1 ? messagesRef1 : messagesRef2;
-          push(messagesRef, { username: username, text: text });
+        const message = msgInput.value;
+        const username = localStorage.getItem("username");
+        if (message) {
+          const newMessageRef = push(messagesRef1);
+          newMessageRef.set({
+            username,
+            text: message
+          });
           msgInput.value = "";
-        } else {
-          alert("Please enter both a username and a message.");
         }
       }
 
       function addMessage(username, text, chatId) {
         const msgDiv = document.createElement("div");
-        msgDiv.textContent = `${username}: ${text}`;
-        if (chatId === 1) {
-          messagesDiv1.appendChild(msgDiv);
-        } else {
-          messagesDiv2.appendChild(msgDiv);
-        }
+        msgDiv.innerText = `${username}: ${text}`;
+        const messagesDiv = chatId === 1 ? messagesDiv1 : messagesDiv2;
+        messagesDiv.appendChild(msgDiv);
       }
 
       function loadMessages(chatId) {
         const messagesRef = chatId === 1 ? messagesRef1 : messagesRef2;
-        const messagesDiv = chatId === 1 ? messagesDiv1 : messagesDiv2;
-
         onValue(messagesRef, (snapshot) => {
           const messages = snapshot.val();
-          messagesDiv.innerHTML = ''; // Clear the existing messages
-          for (let id in messages) {
-            const message = messages[id];
-            addMessage(message.username, message.text, chatId);
+          if (messages) {
+            const messagesDiv = chatId === 1 ? messagesDiv1 : messagesDiv2;
+            messagesDiv.innerHTML = "";
+            Object.values(messages).forEach((msg) => addMessage(msg.username, msg.text, chatId));
           }
         });
       }
 
       function switchChat(chatId) {
         if (chatId === 1) {
-          tab1.classList.add("active-tab");
-          tab2.classList.remove("active-tab");
           chat1.style.display = "block";
           chat2.style.display = "none";
+          tab1.classList.add("active-tab");
+          tab2.classList.remove("active-tab");
           loadMessages(1);
         } else {
-          tab2.classList.add("active-tab");
-          tab1.classList.remove("active-tab");
-          chat2.style.display = "block";
           chat1.style.display = "none";
+          chat2.style.display = "block";
+          tab1.classList.remove("active-tab");
+          tab2.classList.add("active-tab");
           loadMessages(2);
         }
       }
