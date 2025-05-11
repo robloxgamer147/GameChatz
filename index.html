@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GameChatz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #1e1e2f;
+      color: #fff;
+    }
+    h1 {
+      text-align: center;
+      color: #66ff99;
+    }
+    #messages {
+      border: 1px solid #444;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      background: #2e2e3e;
+    }
+    #inputBox {
+      display: flex;
+      margin-top: 10px;
+    }
+    input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+    }
+    button {
+      padding: 10px;
+      background-color: #66ff99;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>GameChatz</h1>
+  <div id="messages"></div>
+  <div id="inputBox">
+    <input type="text" id="msgInput" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    const messagesDiv = document.getElementById("messages");
+    const msgInput = document.getElementById("msgInput");
+
+    // Load messages from localStorage
+    const savedMessages = JSON.parse(localStorage.getItem("gamechatz_messages")) || [];
+    savedMessages.forEach(text => {
+      addMessage(text);
+    });
+
+    function sendMessage() {
+      const text = msgInput.value.trim();
+      if (text !== "") {
+        addMessage(text);
+        savedMessages.push(text);
+        localStorage.setItem("gamechatz_messages", JSON.stringify(savedMessages));
+        msgInput.value = "";
+      }
+    }
+
+    function addMessage(text) {
+      const msg = document.createElement("div");
+      msg.textContent = text;
+      messagesDiv.appendChild(msg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    msgInput.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
