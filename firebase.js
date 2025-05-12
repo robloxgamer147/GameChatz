@@ -1,8 +1,4 @@
-// firebase.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBuLyGwCrPY26ohmHY4YwLVwF0dlAfkzak",
   authDomain: "gamechatz-e61e7.firebaseapp.com",
@@ -14,8 +10,5 @@ const firebaseConfig = {
   measurementId: "G-5XW4J2BQ7N"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-export { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, db, ref, set };
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
