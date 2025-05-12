@@ -2,222 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GameChatz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simple Clicker Game</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
     }
-    .container {
-      width: 100%;
-      max-width: 400px;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    h1 {
+      margin: 20px;
+      color: #333;
     }
-    h2 {
-      text-align: center;
+    .score-board {
+      font-size: 2em;
       margin-bottom: 20px;
+      color: #444;
     }
-    .input-field {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    .btn {
-      width: 100%;
-      padding: 10px;
-      background-color: #007bff;
-      border: none;
+    .click-button {
+      background-color: #6200ea;
       color: #fff;
-      border-radius: 4px;
+      border: none;
+      border-radius: 8px;
+      padding: 20px 40px;
+      font-size: 1.5em;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
-    .btn:hover {
-      background-color: #0056b3;
+    .click-button:hover {
+      background-color: #3700b3;
     }
-    .message-list {
+    .reset-btn {
+      background-color: #e53935;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
       margin-top: 20px;
-      height: 300px;
-      overflow-y: scroll;
-      border: 1px solid #ddd;
-      padding: 10px;
-      background-color: #f9f9f9;
-      border-radius: 4px;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
-    .message {
-      padding: 5px;
-      margin: 5px 0;
-      background-color: #e9ecef;
-      border-radius: 4px;
+    .reset-btn:hover {
+      background-color: #b71c1c;
+    }
+    @media (max-width: 480px) {
+      .click-button {
+        padding: 15px 30px;
+        font-size: 1.2em;
+      }
+      .score-board {
+        font-size: 1.5em;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="container" id="login-container">
-    <h2>Login</h2>
-    <input type="text" id="login-username" class="input-field" placeholder="Username">
-    <input type="password" id="login-password" class="input-field" placeholder="Password">
-    <button class="btn" onclick="login()">Login</button>
-    <p>Don't have an account? <a href="javascript:void(0);" onclick="showSignUp()">Sign Up</a></p>
-  </div>
+  <h1>Simple Clicker Game</h1>
+  <div class="score-board" id="score">Score: 0</div>
+  <button class="click-button" id="clickBtn">Click Me!</button>
+  <button class="reset-btn" id="resetBtn">Reset Score</button>
 
-  <div class="container" id="signup-container" style="display: none;">
-    <h2>Sign Up</h2>
-    <input type="text" id="signup-username" class="input-field" placeholder="Username">
-    <input type="password" id="signup-password" class="input-field" placeholder="Password">
-    <input type="password" id="signup-repeat-password" class="input-field" placeholder="Repeat Password">
-    <button class="btn" onclick="signUp()">Sign Up</button>
-    <p>Already have an account? <a href="javascript:void(0);" onclick="showLogin()">Login</a></p>
-  </div>
-
-  <div class="container" id="chat-container" style="display: none;">
-    <h2>Chat Room</h2>
-    <div class="message-list" id="messages"></div>
-    <input type="text" id="message-input" class="input-field" placeholder="Type a message">
-    <button class="btn" onclick="sendMessage()">Send</button>
-    <button class="btn" onclick="logout()">Logout</button>
-  </div>
-
-  <script type="module">
-    // Firebase Configuration
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getDatabase, ref, set, get, child, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBuLyGwCrPY26ohmHY4YwLVwF0dlAfkzak",
-      authDomain: "gamechatz-e61e7.firebaseapp.com",
-      databaseURL: "https://gamechatz-e61e7-default-rtdb.firebaseio.com",
-      projectId: "gamechatz-e61e7",
-      storageBucket: "gamechatz-e61e7.firebasestorage.app",
-      messagingSenderId: "155399717230",
-      appId: "1:155399717230:web:ae414fa8739baf63d0c17f",
-      measurementId: "G-5XW4J2BQ7N"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth();
-    const db = getDatabase(app);
-
-    // Show Login Page
-    function showLogin() {
-      document.getElementById('login-container').style.display = 'block';
-      document.getElementById('signup-container').style.display = 'none';
-      document.getElementById('chat-container').style.display = 'none';
+  <script>
+    // Check if a saved score exists in localStorage, if not, initialize to 0.
+    let score = parseInt(localStorage.getItem("score")) || 0;
+    
+    // Update score display.
+    const scoreDisplay = document.getElementById("score");
+    function updateScoreDisplay() {
+      scoreDisplay.textContent = "Score: " + score;
     }
-
-    // Show Sign Up Page
-    function showSignUp() {
-      document.getElementById('login-container').style.display = 'none';
-      document.getElementById('signup-container').style.display = 'block';
-      document.getElementById('chat-container').style.display = 'none';
-    }
-
-    // Show Chat Page
-    function showChat() {
-      document.getElementById('login-container').style.display = 'none';
-      document.getElementById('signup-container').style.display = 'none';
-      document.getElementById('chat-container').style.display = 'block';
-      loadMessages();
-    }
-
-    // Log in with Firebase Authentication using username and password
-    function login() {
-      const username = document.getElementById('login-username').value;
-      const password = document.getElementById('login-password').value;
-
-      const userRef = ref(db, 'users/' + username);
-      get(userRef).then((snapshot) => {
-        const userData = snapshot.val();
-        if (userData && userData.password === password) {
-          showChat();
-        } else {
-          alert('Invalid username or password!');
-        }
-      });
-    }
-
-    // Sign up with Firebase Authentication using username and password
-    function signUp() {
-      const username = document.getElementById('signup-username').value;
-      const password = document.getElementById('signup-password').value;
-      const repeatPassword = document.getElementById('signup-repeat-password').value;
-
-      if (password !== repeatPassword) {
-        alert("Passwords do not match!");
-        return;
-      }
-
-      const userRef = ref(db, 'users/' + username);
-      get(userRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          alert('Username already taken!');
-        } else {
-          set(userRef, {
-            username: username,
-            password: password
-          });
-          alert('Account created successfully!');
-          showLogin();
-        }
-      });
-    }
-
-    // Send message to Firebase Realtime Database
-    function sendMessage() {
-      const message = document.getElementById('message-input').value;
-      if (message.trim() === '') return;
-
-      const messagesRef = ref(db, 'messages/');
-      push(messagesRef, {
-        username: document.getElementById('login-username').value,
-        message: message
-      });
-      document.getElementById('message-input').value = ''; // Clear input
-    }
-
-    // Load messages from Firebase Realtime Database
-    function loadMessages() {
-      const messagesRef = ref(db, 'messages/');
-      onChildAdded(messagesRef, (snapshot) => {
-        const messageData = snapshot.val();
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
-        messageElement.textContent = `${messageData.username}: ${messageData.message}`;
-        document.getElementById('messages').appendChild(messageElement);
-      });
-    }
-
-    // Logout
-    function logout() {
-      signOut(auth).then(() => {
-        showLogin();
-      });
-    }
-
-    // On Auth State Change
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        showChat();
-      } else {
-        showLogin();
+    updateScoreDisplay();
+    
+    // Increase score and update localStorage on button click.
+    const clickBtn = document.getElementById("clickBtn");
+    clickBtn.addEventListener("click", () => {
+      score++;
+      localStorage.setItem("score", score);
+      updateScoreDisplay();
+    });
+    
+    // Reset score button functionality.
+    const resetBtn = document.getElementById("resetBtn");
+    resetBtn.addEventListener("click", () => {
+      if (confirm("Are you sure you want to reset your score?")) {
+        score = 0;
+        localStorage.setItem("score", score);
+        updateScoreDisplay();
       }
     });
-
-    // Initially show login page
-    showLogin();
   </script>
 </body>
 </html>
