@@ -1,21 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GameChatz - Main</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameChatz</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="chat-container">
-        <h1>Welcome to GameChatz</h1>
-        <div id="chat-room">
-            <!-- Chat room content will go here -->
-        </div>
-        <button id="logout-button">Logout</button>
-    </div>
+  <div class="container">
+    <div id="welcome-message" class="welcome-message">Welcome to GameChatz</div>
+    <button id="auth-button" class="auth-button" onclick="toggleAuth()">Login / Sign Up</button>
+  </div>
 
-    <script src="firebase.js"></script>
-    <script src="script.js"></script>
+  <script src="firebase.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
