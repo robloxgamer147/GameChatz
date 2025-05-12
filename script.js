@@ -18,89 +18,81 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Wait for DOM to load before attaching event listeners
-document.addEventListener("DOMContentLoaded", function () {
-  // Handle "Login / Sign Up" button logic on index.html
-  const authButton = document.getElementById("auth-button");
+// Handle "Sign Up / Login" button logic on index.html
+const authButton = document.getElementById("auth-button");
 
-  if (authButton) {
-    authButton.addEventListener("click", function () {
-      if (auth.currentUser) {
-        logout();
-      } else {
-        window.location.href = "login.html";
-      }
-    });
-  }
+if (authButton) {
+  authButton.addEventListener("click", function () {
+    // Redirect to the signup page
+    window.location.href = "signup.html";
+  });
+}
 
-  // Handle login form submission
-  const loginForm = document.getElementById("login-form");
-  if (loginForm) {
-    loginForm.addEventListener("submit", function (event) {
-      event.preventDefault();
-      const username = document.getElementById("login-username").value;
-      const password = document.getElementById("login-password").value;
+// Handle login form submission on login.html
+const loginForm = document.getElementById("login-form");
+if (loginForm) {
+  loginForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
 
-      signInWithEmailAndPassword(auth, username + "@gamechatz.com", password)
-        .then(userCredential => {
-          console.log("Logged in successfully!");
-          window.location.href = "index.html"; // Redirect to home after login
-        })
-        .catch(error => {
-          console.error(error);
-          alert("Error logging in: " + error.message);
-        });
-    });
-  }
-
-  // Handle signup form submission
-  const signupForm = document.getElementById("signup-form");
-  if (signupForm) {
-    signupForm.addEventListener("submit", function (event) {
-      event.preventDefault();
-      const username = document.getElementById("signup-username").value;
-      const password = document.getElementById("signup-password").value;
-      const confirmPassword = document.getElementById("signup-confirm-password").value;
-
-      if (password === confirmPassword) {
-        createUserWithEmailAndPassword(auth, username + "@gamechatz.com", password)
-          .then(userCredential => {
-            console.log("Account created successfully!");
-            window.location.href = "login.html"; // Redirect to login page after signup
-          })
-          .catch(error => {
-            console.error(error);
-            alert("Error signing up: " + error.message);
-          });
-      } else {
-        alert("Passwords do not match.");
-      }
-    });
-  }
-
-  // Log out function
-  function logout() {
-    signOut(auth)
-      .then(() => {
-        console.log("Logged out successfully!");
-        window.location.href = "index.html"; // Redirect to home page after logout
+    signInWithEmailAndPassword(auth, username + "@gamechatz.com", password)
+      .then(userCredential => {
+        console.log("Logged in successfully!");
+        window.location.href = "chat.html"; // Redirect to chat page after login
       })
       .catch(error => {
         console.error(error);
-        alert("Error logging out: " + error.message);
+        alert("Error logging in: " + error.message);
       });
-  }
+  });
+}
 
-  // Check if user is logged in on page load
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // User is logged in
-      console.log("User is logged in: " + user.displayName);
-      document.getElementById("auth-button").textContent = "Logout";
+// Handle signup form submission on signup.html
+const signupForm = document.getElementById("signup-form");
+if (signupForm) {
+  signupForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const username = document.getElementById("signup-username").value;
+    const password = document.getElementById("signup-password").value;
+    const confirmPassword = document.getElementById("signup-confirm-password").value;
+
+    if (password === confirmPassword) {
+      createUserWithEmailAndPassword(auth, username + "@gamechatz.com", password)
+        .then(userCredential => {
+          console.log("Account created successfully!");
+          window.location.href = "chat.html"; // Redirect to chat page after signup
+        })
+        .catch(error => {
+          console.error(error);
+          alert("Error signing up: " + error.message);
+        });
     } else {
-      // User is logged out
-      console.log("User is logged out");
-      document.getElementById("auth-button").textContent = "Login / Sign Up";
+      alert("Passwords do not match.");
     }
   });
+}
+
+// Log out function (for when user is logged in)
+function logout() {
+  signOut(auth)
+    .then(() => {
+      console.log("Logged out successfully!");
+      window.location.href = "index.html"; // Redirect to home page after logout
+    })
+    .catch(error => {
+      console.error(error);
+      alert("Error logging out: " + error.message);
+    });
+}
+
+// Check if user is logged in on page load
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User is logged in
+    console.log("User is logged in: " + user.displayName);
+  } else {
+    // User is logged out
+    console.log("User is logged out");
+  }
 });
