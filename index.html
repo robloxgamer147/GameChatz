@@ -2,99 +2,142 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GameChatz</title>
   <style>
+    :root {
+      --bg-color: #121212;
+      --fg-color: #E0E0E0;
+      --accent-color: #1E88E5;
+      --input-bg: #1E1E1E;
+      --input-border: #333;
+      --button-bg: #1E88E5;
+      --button-text: #FFFFFF;
+      --tab-bg: #1F1F1F;
+      --tab-border: #333;
+    }
+
     body {
-      font-family: sans-serif;
       margin: 0;
       padding: 0;
+      background-color: var(--bg-color);
+      color: var(--fg-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       flex-direction: column;
       height: 100vh;
     }
 
-    .page, .tabs {
+    .page {
       display: none;
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
     }
 
     .active {
       display: block;
     }
 
-    .login-container, .chat-container {
-      padding: 20px;
-    }
-
     input, button {
-      padding: 10px;
-      margin: 5px 0;
       width: 100%;
       max-width: 400px;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid var(--input-border);
+      border-radius: 4px;
+      background-color: var(--input-bg);
+      color: var(--fg-color);
       box-sizing: border-box;
+    }
+
+    button {
+      background-color: var(--button-bg);
+      color: var(--button-text);
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #1565C0;
+    }
+
+    a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
 
     #tabs {
       display: flex;
       justify-content: space-around;
-      border-top: 1px solid #ccc;
+      border-top: 1px solid var(--tab-border);
+      background-color: var(--tab-bg);
       position: fixed;
       bottom: 0;
       width: 100%;
-      background: #f0f0f0;
     }
 
     #tabs button {
       flex: 1;
       padding: 10px;
+      background: none;
+      border: none;
+      color: var(--fg-color);
+      font-size: 16px;
+    }
+
+    #tabs button:hover {
+      background-color: #2C2C2C;
     }
 
     .message {
       margin: 5px 0;
+      padding: 8px;
+      background-color: #1E1E1E;
+      border-radius: 4px;
     }
 
     #chat, #chat2 {
       max-height: 300px;
       overflow-y: auto;
+      margin-bottom: 60px; /* Space for tabs */
     }
   </style>
 </head>
 <body>
 
 <div id="loginPage" class="page active">
-  <div class="login-container">
-    <h2>Login</h2>
-    <input id="login-username" placeholder="Username" />
-    <input id="login-password" type="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
-    <p>No account? <a href="#" onclick="showSignUp()">Sign Up</a></p>
-  </div>
+  <h2>Login</h2>
+  <input id="login-username" placeholder="Username" />
+  <input id="login-password" type="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+  <p>No account? <a href="#" onclick="showSignUp()">Sign Up</a></p>
 </div>
 
 <div id="signupPage" class="page">
-  <div class="login-container">
-    <h2>Sign Up</h2>
-    <input id="signup-username" placeholder="Username" />
-    <input id="signup-password" type="password" placeholder="Password" />
-    <input id="signup-password2" type="password" placeholder="Repeat Password" />
-    <button onclick="signUp()">Sign Up</button>
-    <p>Have an account? <a href="#" onclick="showLogin()">Login</a></p>
-  </div>
+  <h2>Sign Up</h2>
+  <input id="signup-username" placeholder="Username" />
+  <input id="signup-password" type="password" placeholder="Password" />
+  <input id="signup-password2" type="password" placeholder="Repeat Password" />
+  <button onclick="signUp()">Sign Up</button>
+  <p>Have an account? <a href="#" onclick="showLogin()">Login</a></p>
 </div>
 
 <div id="chatPage" class="page">
-  <div class="chat-container">
-    <h2>GameChatz</h2>
-    <div id="chat" class="tabs active"></div>
-    <div id="chat2" class="tabs"></div>
-    <input id="message" placeholder="Enter message" />
-    <button onclick="sendMessage()">Send</button>
-  </div>
+  <h2>GameChatz</h2>
+  <div id="chat" class="tabs active"></div>
+  <div id="chat2" class="tabs"></div>
+  <input id="message" placeholder="Enter message" />
+  <button onclick="sendMessage()">Send</button>
+</div>
 
-  <div id="tabs">
-    <button onclick="switchTab(1)">Chat 1</button>
-    <button onclick="switchTab(2)">Chat 2</button>
-  </div>
+<div id="tabs">
+  <button onclick="switchTab(1)">Chat 1</button>
+  <button onclick="switchTab(2)">Chat 2</button>
 </div>
 
 <script type="module">
@@ -112,14 +155,13 @@
   } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyBuLyGwCrPY26ohmHY4YwLVwF0dlAfkzak",
-    authDomain: "gamechatz-e61e7.firebaseapp.com",
-    databaseURL: "https://gamechatz-e61e7-default-rtdb.firebaseio.com",
-    projectId: "gamechatz-e61e7",
-    storageBucket: "gamechatz-e61e7.appspot.com",
-    messagingSenderId: "155399717230",
-    appId: "1:155399717230:web:ae414fa8739baf63d0c17f",
-    measurementId: "G-5XW4J2BQ7N"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -209,6 +251,7 @@
       const container = document.getElementById(i === 0 ? "chat" : "chat2");
       onChildAdded(ref(db, chatId), (snapshot) => {
         const { user, text } = snapshot.val();
+        if (!user || !text) return; // Skip invalid messages
         const msgDiv = document.createElement("div");
         msgDiv.className = "message";
         msgDiv.textContent = `${user}: ${text}`;
