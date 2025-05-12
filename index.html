@@ -40,6 +40,17 @@
     .tab:hover {
       background-color: #5865f2;
     }
+    .create-channel {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    .create-channel:hover {
+      background-color: #45a049;
+    }
     .main {
       flex: 1;
       display: flex;
@@ -90,15 +101,6 @@
       color: white;
       cursor: pointer;
     }
-    .create-channel-btn {
-      background-color: #4CAF50;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-left: 5px;
-    }
     .channel-form {
       display: flex;
       align-items: center;
@@ -126,7 +128,10 @@
   </style>
 </head>
 <body>
-  <div class="tabs" id="tabsContainer"></div>
+  <div class="tabs" id="tabsContainer">
+    <!-- Channels will appear here -->
+    <button class="create-channel" onclick="showCreateChannelForm()">+</button>
+  </div>
   <div class="main">
     <div class="topbar" id="chatName">Select a Channel</div>
     <div class="chat" id="chatWindow"></div>
@@ -147,7 +152,7 @@
     function loadChannels() {
       const tabsContainer = document.getElementById('tabsContainer');
       tabsContainer.innerHTML = '';
-
+      
       // Create a tab for each channel
       for (let channel in channels) {
         const tab = document.createElement('div');
@@ -156,6 +161,13 @@
         tab.onclick = () => switchChannel(channel);
         tabsContainer.appendChild(tab);
       }
+
+      // Add the "+" button for creating new channels
+      const createChannelButton = document.createElement('button');
+      createChannelButton.classList.add('create-channel');
+      createChannelButton.textContent = '+';
+      createChannelButton.onclick = showCreateChannelForm;
+      tabsContainer.appendChild(createChannelButton);
     }
 
     function switchChannel(channelName) {
