@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GameChatz</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    /* Your existing styles */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #2f3136;
@@ -63,6 +59,18 @@
       font-weight: bold;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+    }
+    .logout-btn {
+      background-color: #ff4747;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .logout-btn:hover {
+      background-color: #d43f3f;
     }
     .chat {
       flex: 1;
@@ -133,7 +141,10 @@
     <button class="create-channel" onclick="showCreateChannelForm()">+</button>
   </div>
   <div class="main">
-    <div class="topbar" id="chatName">Select a Channel</div>
+    <div class="topbar" id="chatName">
+      <div id="channelTitle">Select a Channel</div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
     <div class="chat" id="chatWindow"></div>
     <div class="input-area">
       <input type="text" id="messageInput" placeholder="Type your message..." />
@@ -172,7 +183,7 @@
 
     function switchChannel(channelName) {
       currentChannel = channelName;
-      document.getElementById('chatName').innerText = channelName;
+      document.getElementById('channelTitle').innerText = channelName;
       loadMessages();
     }
 
@@ -224,8 +235,20 @@
       loadMessages();
     }
 
+    function logout() {
+      localStorage.removeItem('username'); // Clear the username
+      localStorage.removeItem('channels'); // Clear the channels
+      window.location.href = '/'; // Redirect to the login page or reload the page
+    }
+
     // Initialize app
     window.onload = () => {
+      const username = localStorage.getItem('username');
+      if (!username) {
+        window.location.href = '/login.html'; // Redirect to the login page if no username is found
+        return;
+      }
+
       loadChannels();
       if (Object.keys(channels).length > 0) {
         currentChannel = Object.keys(channels)[0]; // Switch to the first available channel
