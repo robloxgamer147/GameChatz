@@ -1,260 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GameChatz</title>
-  <style>
-    /* Your existing styles */
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #2f3136;
-      color: #dcddde;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    .tabs {
-      display: flex;
-      justify-content: flex-start;
-      background-color: #202225;
-      padding: 10px 20px;
-      border-bottom: 1px solid #1e1f22;
-      overflow-x: auto;
-      flex-wrap: nowrap;
-    }
-    .tab {
-      background-color: #36393f;
-      color: white;
-      padding: 10px;
-      margin: 5px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-      white-space: nowrap;
-    }
-    .tab:hover {
-      background-color: #5865f2;
-    }
-    .create-channel {
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 8px;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-    .create-channel:hover {
-      background-color: #45a049;
-    }
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .topbar {
-      background-color: #2f3136;
-      padding: 15px;
-      border-bottom: 1px solid #1e1f22;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logout-btn {
-      background-color: #ff4747;
-      color: white;
-      padding: 8px 15px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .logout-btn:hover {
-      background-color: #d43f3f;
-    }
-    .chat {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-    }
-    .message {
-      margin: 10px 0;
-    }
-    .username {
-      color: #7289da;
-      font-weight: bold;
-      margin-right: 5px;
-    }
-    .input-area {
-      display: flex;
-      padding: 10px;
-      border-top: 1px solid #1e1f22;
-      background-color: #40444b;
-    }
-    .input-area input {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      outline: none;
-      margin-right: 10px;
-      background-color: #2f3136;
-      color: white;
-    }
-    .input-area button {
-      background-color: #5865f2;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      color: white;
-      cursor: pointer;
-    }
-    .channel-form {
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      background-color: #40444b;
-      border-top: 1px solid #1e1f22;
-    }
-    .channel-form input {
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      margin-right: 5px;
-      background-color: #2f3136;
-      color: white;
-    }
-    @media (max-width: 600px) {
-      .tabs {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .tab {
-        margin: 5px 10px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameChatz</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+
+        input[type="text"], input[type="password"] {
+            background-color: #333;
+            color: white;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .chat-container {
+            display: none;
+        }
+
+        .chat-header {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .chat-content {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #1b1b1b;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+        .chat-footer {
+            margin-top: 10px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            background-color: #444;
+            border-radius: 5px;
+        }
+
+        .message span {
+            font-weight: bold;
+        }
+
+        .tab-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .tab-bar button {
+            flex: 1;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .tab-bar button:hover {
+            background-color: #555;
+        }
+    </style>
 </head>
 <body>
-  <div class="tabs" id="tabsContainer">
-    <!-- Channels will appear here -->
-    <button class="create-channel" onclick="showCreateChannelForm()">+</button>
-  </div>
-  <div class="main">
-    <div class="topbar" id="chatName">
-      <div id="channelTitle">Select a Channel</div>
-      <button class="logout-btn" onclick="logout()">Logout</button>
+    <!-- Login Page -->
+    <div id="login-page" class="container">
+        <h1>Login</h1>
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p>Don't have an account? <a href="#" onclick="showSignUp()">Sign Up</a></p>
     </div>
-    <div class="chat" id="chatWindow"></div>
-    <div class="input-area">
-      <input type="text" id="messageInput" placeholder="Type your message..." />
-      <button onclick="sendMessage()">Send</button>
+
+    <!-- Sign Up Page -->
+    <div id="signup-page" class="container" style="display:none;">
+        <h1>Sign Up</h1>
+        <input type="text" id="signup-username" placeholder="Username">
+        <input type="password" id="signup-password" placeholder="Password">
+        <input type="password" id="signup-repeat-password" placeholder="Repeat Password">
+        <button onclick="signUp()">Sign Up</button>
+        <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
     </div>
-    <div class="channel-form" id="channelForm" style="display:none;">
-      <input type="text" id="newChannelName" placeholder="Channel Name" />
-      <button class="create-channel-btn" onclick="createChannel()">Create</button>
+
+    <!-- Chat Page -->
+    <div id="chat-page" class="container chat-container">
+        <h2>GameChatz</h2>
+        <div id="chat-room" class="chat-room">
+            <div class="chat-header">
+                <h3>Room 1</h3>
+            </div>
+            <div class="chat-content" id="messages"></div>
+            <div class="chat-footer">
+                <input type="text" id="message-input" placeholder="Type a message">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        <div class="tab-bar">
+            <button onclick="changeRoom('Room 1')">Room 1</button>
+            <button onclick="changeRoom('Room 2')">Room 2</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    let currentChannel = null;
-    const channels = JSON.parse(localStorage.getItem('channels')) || {};
+    <script>
+        let currentUser = null;
+        let rooms = {
+            "Room 1": [],
+            "Room 2": []
+        };
+        let currentRoom = "Room 1";
 
-    function loadChannels() {
-      const tabsContainer = document.getElementById('tabsContainer');
-      tabsContainer.innerHTML = '';
-      
-      // Create a tab for each channel
-      for (let channel in channels) {
-        const tab = document.createElement('div');
-        tab.classList.add('tab');
-        tab.textContent = channel;
-        tab.onclick = () => switchChannel(channel);
-        tabsContainer.appendChild(tab);
-      }
+        // Show the Sign Up page
+        function showSignUp() {
+            document.getElementById("login-page").style.display = "none";
+            document.getElementById("signup-page").style.display = "block";
+        }
 
-      // Add the "+" button for creating new channels
-      const createChannelButton = document.createElement('button');
-      createChannelButton.classList.add('create-channel');
-      createChannelButton.textContent = '+';
-      createChannelButton.onclick = showCreateChannelForm;
-      tabsContainer.appendChild(createChannelButton);
-    }
+        // Show the Login page
+        function showLogin() {
+            document.getElementById("signup-page").style.display = "none";
+            document.getElementById("login-page").style.display = "block";
+        }
 
-    function switchChannel(channelName) {
-      currentChannel = channelName;
-      document.getElementById('channelTitle').innerText = channelName;
-      loadMessages();
-    }
+        // Log the user in
+        function login() {
+            const username = document.getElementById("login-username").value;
+            const password = document.getElementById("login-password").value;
+            
+            if (username && password) {
+                currentUser = username;
+                document.getElementById("login-page").style.display = "none";
+                document.getElementById("chat-page").style.display = "block";
+                loadMessages();
+            } else {
+                alert("Please enter both username and password.");
+            }
+        }
 
-    function showCreateChannelForm() {
-      document.getElementById('channelForm').style.display = 'flex';
-    }
+        // Sign up the user
+        function signUp() {
+            const username = document.getElementById("signup-username").value;
+            const password = document.getElementById("signup-password").value;
+            const repeatPassword = document.getElementById("signup-repeat-password").value;
 
-    function createChannel() {
-      const newChannelName = document.getElementById('newChannelName').value.trim();
-      if (!newChannelName) return;
+            if (password === repeatPassword) {
+                currentUser = username;
+                document.getElementById("signup-page").style.display = "none";
+                document.getElementById("chat-page").style.display = "block";
+                loadMessages();
+            } else {
+                alert("Passwords do not match.");
+            }
+        }
 
-      // Add the new channel to the channels list
-      channels[newChannelName] = [];
-      localStorage.setItem('channels', JSON.stringify(channels));
+        // Send a message to the current room
+        function sendMessage() {
+            const message = document.getElementById("message-input").value;
+            if (message) {
+                rooms[currentRoom].push({ user: currentUser, message });
+                document.getElementById("message-input").value = '';
+                loadMessages();
+            }
+        }
 
-      // Reload the tabs
-      loadChannels();
+        // Change the chat room
+        function changeRoom(roomName) {
+            currentRoom = roomName;
+            loadMessages();
+        }
 
-      // Switch to the new channel
-      switchChannel(newChannelName);
-
-      // Hide the form
-      document.getElementById('channelForm').style.display = 'none';
-    }
-
-    function loadMessages() {
-      const chatWindow = document.getElementById('chatWindow');
-      chatWindow.innerHTML = '';
-      if (currentChannel && channels[currentChannel]) {
-        channels[currentChannel].forEach(msg => {
-          const div = document.createElement('div');
-          div.classList.add('message');
-          div.innerHTML = `<span class="username">${msg.username}:</span>${msg.text}`;
-          chatWindow.appendChild(div);
-        });
-      }
-      chatWindow.scrollTop = chatWindow.scrollHeight;
-    }
-
-    function sendMessage() {
-      const input = document.getElementById('messageInput');
-      const text = input.value.trim();
-      if (!text || !currentChannel) return;
-
-      const username = localStorage.getItem('username') || 'Anonymous';
-      channels[currentChannel].push({ username, text });
-      localStorage.setItem('channels', JSON.stringify(channels));
-      input.value = '';
-      loadMessages();
-    }
-
-    function logout() {
-      localStorage.removeItem('username'); // Clear the username
-      localStorage.removeItem('channels'); // Clear the channels
-      window.location.href = '/'; // Redirect to the login page or reload the page
-    }
-
-    // Initialize app
-    window.onload = () => {
-      const username = localStorage.getItem('username');
-      if (!username) {
-        window.location.href = '/login.html'; // Redirect to the login page if no username is found
-        return;
-      }
-
-      loadChannels();
-      if (Object.keys(channels).length > 0) {
-        currentChannel = Object.keys(channels)[0]; // Switch to the first available channel
-        switchChannel(currentChannel);
-      }
-    };
-  </script>
+        // Load messages for the current room
+        function loadMessages() {
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML = "";
+            rooms[currentRoom].forEach(msg => {
+                const messageElement = document.createElement("div");
+                messageElement.classList.add("message");
+                messageElement.innerHTML = `<span>${msg.user}:</span> ${msg.message}`;
+                messagesDiv.appendChild(messageElement);
+            });
+        }
+    </script>
 </body>
 </html>
