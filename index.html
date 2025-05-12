@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GameChatz</title>
     <style>
-        /* Global Styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #121212;
@@ -107,6 +106,7 @@
     </style>
 </head>
 <body>
+
     <!-- Login Page -->
     <div id="login-page" class="container">
         <h1>Login</h1>
@@ -131,7 +131,7 @@
         <h2>GameChatz</h2>
         <div id="chat-room" class="chat-room">
             <div class="chat-header">
-                <h3>Room 1</h3>
+                <h3 id="room-name">Room 1</h3>
             </div>
             <div class="chat-content" id="messages"></div>
             <div class="chat-footer">
@@ -142,6 +142,7 @@
         <div class="tab-bar">
             <button onclick="changeRoom('Room 1')">Room 1</button>
             <button onclick="changeRoom('Room 2')">Room 2</button>
+            <button onclick="createRoom()">+</button>
         </div>
     </div>
 
@@ -209,6 +210,7 @@
         // Change the chat room
         function changeRoom(roomName) {
             currentRoom = roomName;
+            document.getElementById("room-name").innerText = roomName;
             loadMessages();
         }
 
@@ -222,6 +224,23 @@
                 messageElement.innerHTML = `<span>${msg.user}:</span> ${msg.message}`;
                 messagesDiv.appendChild(messageElement);
             });
+        }
+
+        // Create a new room
+        function createRoom() {
+            const roomName = prompt("Enter new room name:");
+            if (roomName && !rooms[roomName]) {
+                rooms[roomName] = [];
+                const tabBar = document.querySelector(".tab-bar");
+                const newButton = document.createElement("button");
+                newButton.innerText = roomName;
+                newButton.onclick = function () {
+                    changeRoom(roomName);
+                };
+                tabBar.insertBefore(newButton, tabBar.lastChild);
+            } else {
+                alert("Room already exists or invalid name.");
+            }
         }
     </script>
 </body>
