@@ -1,108 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Simple Clicker Game</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameChatz</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f0f0f0;
+      font-family: sans-serif;
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
       height: 100vh;
     }
-    h1 {
-      margin: 20px;
-      color: #333;
+
+    .page, .tabs {
+      display: none;
     }
-    .score-board {
-      font-size: 2em;
-      margin-bottom: 20px;
-      color: #444;
+
+    .active {
+      display: block;
     }
-    .click-button {
-      background-color: #6200ea;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 20px 40px;
-      font-size: 1.5em;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+
+    .login-container, .chat-container {
+      padding: 20px;
     }
-    .click-button:hover {
-      background-color: #3700b3;
+
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
     }
-    .reset-btn {
-      background-color: #e53935;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-size: 1em;
-      cursor: pointer;
-      margin-top: 20px;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+
+    #tabs {
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid #ccc;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #f0f0f0;
     }
-    .reset-btn:hover {
-      background-color: #b71c1c;
+
+    #tabs button {
+      flex: 1;
+      padding: 10px;
     }
-    @media (max-width: 480px) {
-      .click-button {
-        padding: 15px 30px;
-        font-size: 1.2em;
-      }
-      .score-board {
-        font-size: 1.5em;
-      }
+
+    .message {
+      margin: 5px 0;
+    }
+
+    #chat, #chat2 {
+      max-height: 300px;
+      overflow-y: auto;
     }
   </style>
 </head>
 <body>
 
-  <h1>Simple Clicker Game</h1>
-  <div class="score-board" id="score">Score: 0</div>
-  <button class="click-button" id="clickBtn">Click Me!</button>
-  <button class="reset-btn" id="resetBtn">Reset Score</button>
+<div id="loginPage" class="page active">
+  <div class="login-container">
+    <h2>Login</h2>
+    <input id="login-username" placeholder="Username" />
+    <input id="login-password" type="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <p>No account? <a href="#" onclick="showSignUp()">Sign Up</a></p>
+  </div>
+</div>
 
-  <script>
-    // Check if a saved score exists in localStorage, if not, initialize to 0.
-    let score = parseInt(localStorage.getItem("score")) || 0;
-    
-    // Update score display.
-    const scoreDisplay = document.getElementById("score");
-    function updateScoreDisplay() {
-      scoreDisplay.textContent = "Score: " + score;
+<div id="signupPage" class="page">
+  <div class="login-container">
+    <h2>Sign Up</h2>
+    <input id="signup-username" placeholder="Username" />
+    <input id="signup-password" type="password" placeholder="Password" />
+    <input id="signup-password2" type="password" placeholder="Repeat Password" />
+    <button onclick="signUp()">Sign Up</button>
+    <p>Have an account? <a href="#" onclick="showLogin()">Login</a></p>
+  </div>
+</div>
+
+<div id="chatPage" class="page">
+  <div class="chat-container">
+    <h2>GameChatz</h2>
+    <div id="chat" class="tabs active"></div>
+    <div id="chat2" class="tabs"></div>
+    <input id="message" placeholder="Enter message" />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <div id="tabs">
+    <button onclick="switchTab(1)">Chat 1</button>
+    <button onclick="switchTab(2)">Chat 2</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword
+  } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import {
+    getDatabase,
+    ref,
+    push,
+    onChildAdded
+  } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBuLyGwCrPY26ohmHY4YwLVwF0dlAfkzak",
+    authDomain: "gamechatz-e61e7.firebaseapp.com",
+    databaseURL: "https://gamechatz-e61e7-default-rtdb.firebaseio.com",
+    projectId: "gamechatz-e61e7",
+    storageBucket: "gamechatz-e61e7.appspot.com",
+    messagingSenderId: "155399717230",
+    appId: "1:155399717230:web:ae414fa8739baf63d0c17f",
+    measurementId: "G-5XW4J2BQ7N"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  let currentUser = localStorage.getItem("username");
+  let activeTab = 1;
+
+  if (currentUser) {
+    showChat();
+  }
+
+  window.showSignUp = () => {
+    document.getElementById("loginPage").classList.remove("active");
+    document.getElementById("signupPage").classList.add("active");
+  };
+
+  window.showLogin = () => {
+    document.getElementById("signupPage").classList.remove("active");
+    document.getElementById("loginPage").classList.add("active");
+  };
+
+  window.signUp = () => {
+    const username = document.getElementById("signup-username").value;
+    const password = document.getElementById("signup-password").value;
+    const password2 = document.getElementById("signup-password2").value;
+
+    if (password !== password2) {
+      alert("Passwords don't match!");
+      return;
     }
-    updateScoreDisplay();
-    
-    // Increase score and update localStorage on button click.
-    const clickBtn = document.getElementById("clickBtn");
-    clickBtn.addEventListener("click", () => {
-      score++;
-      localStorage.setItem("score", score);
-      updateScoreDisplay();
+
+    const email = `${username}@gamechatz.com`;
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        localStorage.setItem("username", username);
+        showChat();
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  };
+
+  window.login = () => {
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
+    const email = `${username}@gamechatz.com`;
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        localStorage.setItem("username", username);
+        showChat();
+      })
+      .catch((error) => {
+        alert("Login failed: " + error.message);
+      });
+  };
+
+  function showChat() {
+    document.getElementById("loginPage").classList.remove("active");
+    document.getElementById("signupPage").classList.remove("active");
+    document.getElementById("chatPage").classList.add("active");
+    loadMessages();
+  }
+
+  window.switchTab = (tab) => {
+    activeTab = tab;
+    document.getElementById("chat").classList.toggle("active", tab === 1);
+    document.getElementById("chat2").classList.toggle("active", tab === 2);
+  };
+
+  window.sendMessage = () => {
+    const msg = document.getElementById("message").value.trim();
+    if (!msg) return;
+
+    const chatId = activeTab === 1 ? "chat1" : "chat2";
+    push(ref(db, chatId), {
+      user: localStorage.getItem("username"),
+      text: msg
     });
-    
-    // Reset score button functionality.
-    const resetBtn = document.getElementById("resetBtn");
-    resetBtn.addEventListener("click", () => {
-      if (confirm("Are you sure you want to reset your score?")) {
-        score = 0;
-        localStorage.setItem("score", score);
-        updateScoreDisplay();
-      }
+    document.getElementById("message").value = "";
+  };
+
+  function loadMessages() {
+    ["chat1", "chat2"].forEach((chatId, i) => {
+      const container = document.getElementById(i === 0 ? "chat" : "chat2");
+      onChildAdded(ref(db, chatId), (snapshot) => {
+        const { user, text } = snapshot.val();
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "message";
+        msgDiv.textContent = `${user}: ${text}`;
+        container.appendChild(msgDiv);
+      });
     });
-  </script>
+  }
+</script>
 </body>
 </html>
