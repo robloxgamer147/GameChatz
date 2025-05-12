@@ -15,28 +15,27 @@
       background-color: #2f3136;
       color: #dcddde;
       display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .sidebar {
-      width: 80px;
-      background-color: #202225;
-      display: flex;
       flex-direction: column;
-      align-items: center;
-      padding-top: 1rem;
-      border-right: 1px solid #1e1f22;
+      height: 100vh;
+    }
+    .tabs {
+      display: flex;
+      justify-content: flex-start;
+      background-color: #202225;
+      padding: 10px 20px;
+      border-bottom: 1px solid #1e1f22;
+      overflow-x: auto;
+      flex-wrap: nowrap;
     }
     .tab {
       background-color: #36393f;
       color: white;
       padding: 10px;
-      margin: 5px 0;
+      margin: 5px;
       border-radius: 8px;
-      width: 60px;
-      text-align: center;
       cursor: pointer;
       transition: background 0.2s;
+      white-space: nowrap;
     }
     .tab:hover {
       background-color: #5865f2;
@@ -116,32 +115,18 @@
       color: white;
     }
     @media (max-width: 600px) {
-      .sidebar {
-        flex-direction: row;
-        height: 60px;
-        width: 100%;
-        border-right: none;
-        border-top: 1px solid #1e1f22;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        z-index: 10;
-      }
-      .main {
-        margin-bottom: 60px;
+      .tabs {
+        flex-wrap: wrap;
+        justify-content: center;
       }
       .tab {
-        width: 40px;
-        margin: 0 5px;
+        margin: 5px 10px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <div id="tabsContainer"></div>
-    <div class="tab" onclick="showCreateChannelForm()">+ Create Channel</div>
-  </div>
+  <div class="tabs" id="tabsContainer"></div>
   <div class="main">
     <div class="topbar" id="chatName">Select a Channel</div>
     <div class="chat" id="chatWindow"></div>
@@ -162,6 +147,8 @@
     function loadChannels() {
       const tabsContainer = document.getElementById('tabsContainer');
       tabsContainer.innerHTML = '';
+
+      // Create a tab for each channel
       for (let channel in channels) {
         const tab = document.createElement('div');
         tab.classList.add('tab');
