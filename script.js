@@ -1,81 +1,70 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
-  const loginSignupBtn = document.getElementById('loginSignupBtn');
+import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, db, ref, set } from "./firebase.js";
 
-  // Redirect from index.html to signup.html
-  if (loginSignupBtn) {
-    loginSignupBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.location.href = 'signup.html';
-    });
-  }
+document.addEventListener("DOMContentLoaded", () => {
+  const currentPage = window.location.pathname;
 
-  // Redirect from signup.html to index.html after "signing up"
-  if (signupBtn) {
-    signupBtn.addEventListener('click', (e) => {
-      e.preventDefault();
+  if (currentPage.endsWith("login.html")) {
+    const loginBtn = document.getElementById("loginBtn");
+    loginBtn?.addEventListener("click", () => {
+      const email = document.getElementById("loginUsername")?.value.trim();
+      const password = document.getElementById("loginPassword")?.value.trim();
 
-      // Get values (optional for real Firebase auth)
-      const username = document.getElementById('signupUsername')?.value;
-      const password = document.getElementById('signupPassword')?.value;
-      const confirmPassword = document.getElementById('confirmPassword')?.value;
-
-      if (!username || !password || !confirmPassword) {
+      if (!email || !password) {
         alert("Please fill all fields.");
         return;
       }
 
-      if (password !== confirmPassword) {
+      signInWithEmailAndPassword(auth, email + "@gamechatz.fake", password)
+        .then((userCredential) => {
+          localStorage.setItem("username", email);
+          window.location.href = "index.html";
+        })
+        .catch((error) => {
+          alert("Login error: " + error.message);
+        });
+    });
+  } else if (currentPage.endsWith("signup.html")) {
+    const signupBtn = document.getElementById("signupBtn");
+    signupBtn?.addEventListener("click", () => {
+      const email = document.getElementById("signupUsername")?.value.trim();
+      const password = document.getElementById("signupPassword")?.value.trim();
+      const confirm = document.getElementById("confirmPassword")?.value.trim();
+
+      if (!email || !password || !confirm) {
+        alert("Please fill all fields.");
+        return;
+      }
+
+      if (password !== confirm) {
         alert("Passwords do not match.");
         return;
       }
 
-      // Save user to localStorage (for testing only)
-      localStorage.setItem('gamechatzUser', username);
-
-      window.location.href = 'index.html';
+      createUserWithEmailAndPassword(auth, email + "@gamechatz.fake", password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          set(ref(db, "users/" + user.uid), { username: email });
+          localStorage.setItem("username", email);
+          window.location.href = "index.html";
+        })
+        .catch((error) => {
+          alert("Sign-up error: " + error.message);
+        });
     });
-  }
+  } else if (currentPage.endsWith("index.html")) {
+    const username = localStorage.getItem("username");
+    const display = document.getElementById("usernameDisplay");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-  // Redirect from login.html to index.html after "logging in"
-  if (loginBtn) {
-    loginBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      const username = document.getElementById('loginUsername')?.value;
-      const password = document.getElementById('loginPassword')?.value;
-
-      if (!username || !password) {
-        alert("Please fill in both fields.");
-        return;
-      }
-
-      // Save user to localStorage (simulate login)
-      localStorage.setItem('gamechatzUser', username);
-
-      window.location.href = 'index.html';
-    });
-  }
-
-  // Show logged-in username on index.html
-  const usernameDisplay = document.getElementById('usernameDisplay');
-  if (usernameDisplay) {
-    const savedUser = localStorage.getItem('gamechatzUser');
-    if (savedUser) {
-      usernameDisplay.textContent = savedUser;
+    if (!username) {
+      window.location.href = "login.html";
     } else {
-      // Redirect to login if no user
-      window.location.href = 'login.html';
+      display.textContent = username;
     }
-  }
 
-  // Logout
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('gamechatzUser');
-      window.location.href = 'login.html';
+    logoutBtn?.addEventListener("click", () => {
+      localStorage.removeItem("username");
+      window.location.href = "login.html";
     });
   }
 });
