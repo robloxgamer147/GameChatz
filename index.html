@@ -51,6 +51,8 @@
       padding: 15px;
       border-bottom: 1px solid #1e1f22;
       font-weight: bold;
+      display: flex;
+      justify-content: space-between;
     }
     .chat {
       flex: 1;
@@ -89,6 +91,30 @@
       color: white;
       cursor: pointer;
     }
+    .create-channel-btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    .channel-form {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background-color: #40444b;
+      border-top: 1px solid #1e1f22;
+    }
+    .channel-form input {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      margin-right: 5px;
+      background-color: #2f3136;
+      color: white;
+    }
     @media (max-width: 600px) {
       .sidebar {
         flex-direction: row;
@@ -113,60 +139,99 @@
 </head>
 <body>
   <div class="sidebar">
-    <div class="tab" onclick="switchTab('chat1')">Chat 1</div>
-    <div class="tab" onclick="switchTab('chat2')">Chat 2</div>
+    <div id="tabsContainer"></div>
+    <div class="tab" onclick="showCreateChannelForm()">+ Create Channel</div>
   </div>
   <div class="main">
-    <div class="topbar" id="chatName">Chat 1</div>
+    <div class="topbar" id="chatName">Select a Channel</div>
     <div class="chat" id="chatWindow"></div>
     <div class="input-area">
       <input type="text" id="messageInput" placeholder="Type your message..." />
       <button onclick="sendMessage()">Send</button>
     </div>
+    <div class="channel-form" id="channelForm" style="display:none;">
+      <input type="text" id="newChannelName" placeholder="Channel Name" />
+      <button class="create-channel-btn" onclick="createChannel()">Create</button>
+    </div>
   </div>
 
   <script>
-    let currentTab = 'chat1';
-    const chats = {
-      chat1: [],
-      chat2: [],
-    };
+    let currentChannel = null;
+    const channels = JSON.parse(localStorage.getItem('channels')) || {};
 
-    function switchTab(tabName) {
-      currentTab = tabName;
-      document.getElementById('chatName').innerText = tabName.replace('chat', 'Chat ');
+    function loadChannels() {
+      const tabsContainer = document.getElementById('tabsContainer');
+      tabsContainer.innerHTML = '';
+      for (let channel in channels) {
+        const tab = document.createElement('div');
+        tab.classList.add('tab');
+        tab.textContent = channel;
+        tab.onclick = () => switchChannel(channel);
+        tabsContainer.appendChild(tab);
+      }
+    }
+
+    function switchChannel(channelName) {
+      currentChannel = channelName;
+      document.getElementById('chatName').innerText = channelName;
       loadMessages();
+    }
+
+    function showCreateChannelForm() {
+      document.getElementById('channelForm').style.display = 'flex';
+    }
+
+    function createChannel() {
+      const newChannelName = document.getElementById('newChannelName').value.trim();
+      if (!newChannelName) return;
+
+      // Add the new channel to the channels list
+      channels[newChannelName] = [];
+      localStorage.setItem('channels', JSON.stringify(channels));
+
+      // Reload the tabs
+      loadChannels();
+
+      // Switch to the new channel
+      switchChannel(newChannelName);
+
+      // Hide the form
+      document.getElementById('channelForm').style.display = 'none';
     }
 
     function loadMessages() {
       const chatWindow = document.getElementById('chatWindow');
       chatWindow.innerHTML = '';
-      chats[currentTab].forEach(msg => {
-        const div = document.createElement('div');
-        div.classList.add('message');
-        div.innerHTML = `<span class="username">${msg.username}:</span>${msg.text}`;
-        chatWindow.appendChild(div);
-      });
+      if (currentChannel && channels[currentChannel]) {
+        channels[currentChannel].forEach(msg => {
+          const div = document.createElement('div');
+          div.classList.add('message');
+          div.innerHTML = `<span class="username">${msg.username}:</span>${msg.text}`;
+          chatWindow.appendChild(div);
+        });
+      }
       chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
     function sendMessage() {
       const input = document.getElementById('messageInput');
       const text = input.value.trim();
-      if (!text) return;
+      if (!text || !currentChannel) return;
 
       const username = localStorage.getItem('username') || 'Anonymous';
-      chats[currentTab].push({ username, text });
-      localStorage.setItem('chats', JSON.stringify(chats));
+      channels[currentChannel].push({ username, text });
+      localStorage.setItem('channels', JSON.stringify(channels));
       input.value = '';
       loadMessages();
     }
 
-    // Load saved messages
+    // Initialize app
     window.onload = () => {
-      const savedChats = localStorage.getItem('chats');
-      if (savedChats) Object.assign(chats, JSON.parse(savedChats));
-      loadMessages();
+      loadChannels();
+      if (Object.keys(channels).length > 0) {
+        currentChannel = Object.keys(channels)[0]; // Switch to the first available channel
+        switchChannel(currentChannel);
+      }
     };
   </script>
 </body>
