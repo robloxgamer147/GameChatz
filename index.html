@@ -2294,10 +2294,40 @@
                 showError('Please enter both email and password');
                 return;
             }
-
+        
             auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Check if user exists in database
+                    return database.ref(`users/${userCredential.user.uid}`).once('value');
+                })
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        // Create user in database if they don't exist
+                        const user = auth.currentUser;
+                        return database.ref(`users/${user.uid}`).set({
+                            name: user.displayName || 'User',
+                            email: user.email,
+                            photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=random`,
+                            status: 'online',
+                            lastSeen: firebase.database.ServerValue.TIMESTAMP,
+                            createdAt: firebase.database.ServerValue.TIMESTAMP
+                        });
+                    }
+                })
                 .catch((error) => {
-                    showError(error.message);
+                    console.error('Login error:', error);
+                    let errorMessage = error.message;
+                    
+                    // More user-friendly error messages
+                    if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'No account found with this email';
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMessage = 'Incorrect password';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'Invalid email address';
+                    }
+                    
+                    showError(errorMessage);
                 });
         }
 
