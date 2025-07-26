@@ -1864,6 +1864,9 @@
                     <button class="chat-action-button" title="More options" id="chatMoreActions">
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
+                        <button class="chat-action-button" title="Logout" id="logoutButton">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
                     <div class="dropdown-menu" id="chatDropdownMenu">
                         <div class="dropdown-item">
                             <i class="fas fa-user-friends dropdown-icon"></i>
@@ -2246,9 +2249,10 @@
                 }
             });
 
-            // Logout button
-            logoutButton.addEventListener('click', handleLogout);
-        }
+            // Logout button (with null check)
+            if (logoutButton) {
+                logoutButton.addEventListener('click', handleLogout);
+            }
 
         // Check auth state
         function checkAuthState() {
@@ -3293,8 +3297,10 @@
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
-        // Initialize the app
-        init();
+        // Initialize the app after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+        });
     </script>
 </body>
 </html>
